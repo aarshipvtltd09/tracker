@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  /* Using a very clean, professional deep dark aesthetic (Linear/Vercel style) */
+  @apply bg-[#030303] text-gray-200 antialiased min-h-screen bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))];
+}
+
+.card {
+  @apply bg-white/[0.02] backdrop-blur-2xl rounded-2xl p-6 border border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 hover:border-white/[0.08] hover:bg-white/[0.03];
+}
+
+.btn-primary {
+  @apply bg-white text-black px-5 py-2.5 rounded-xl font-medium shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-gray-100 transition-all active:scale-95 flex items-center justify-center;
+}
+
+.btn-secondary {
+  @apply bg-transparent text-gray-300 px-5 py-2.5 rounded-xl font-medium border border-white/10 hover:bg-white/5 hover:text-white transition-all active:scale-95 flex items-center justify-center;
+}
+
+.custom-checkbox {
+  @apply w-5 h-5 rounded border border-white/20 text-white focus:ring-white/50 focus:ring-offset-0 bg-transparent transition-colors cursor-pointer;
+}
+
+/* Scrollbar customization for a cleaner look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1); 
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2); 
+}

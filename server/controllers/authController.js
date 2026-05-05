@@ -51,14 +51,21 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    // Send Email in background (don't await to speed up response)
-    sendEmail({
-      email: user.email,
-      subject: 'Verify your Tracker account',
-      otp: otp
-    }).catch(err => console.error('Background Email Error:', err.message));
-
-    res.status(201).json({ message: 'OTP sent to email. Please verify.' });
+    // Send Email (Awaiting is necessary for Serverless like Vercel)
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Verify your Tracker account',
+        otp: otp
+      });
+      res.status(201).json({ message: 'OTP sent to email. Please verify.' });
+    } catch (emailErr) {
+      console.error('Email Send Error:', emailErr.message);
+      res.status(201).json({ 
+        message: 'Account created but OTP email failed. Please use Resend OTP.',
+        warning: 'Check EMAIL_USER/PASS settings'
+      });
+    }
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -83,13 +90,17 @@ exports.resendOTP = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
 
-    sendEmail({
-      email: user.email,
-      subject: 'Verify your Tracker account - New OTP',
-      otp: otp
-    }).catch(err => console.error('Background Email Error:', err.message));
-
-    res.json({ message: 'New OTP sent to email' });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Verify your Tracker account - New OTP',
+        otp: otp
+      });
+      res.json({ message: 'New OTP sent to email' });
+    } catch (emailErr) {
+      console.error('Resend OTP Error:', emailErr.message);
+      res.status(500).json({ message: 'Failed to send OTP email. Please try again later.' });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -202,13 +213,17 @@ exports.forgotPassword = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
 
-    sendEmail({
-      email: user.email,
-      subject: 'Password Reset OTP - Tracker',
-      otp: otp
-    }).catch(err => console.error('Background Email Error:', err.message));
-
-    res.json({ message: 'OTP sent to your email' });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password Reset OTP - Tracker',
+        otp: otp
+      });
+      res.json({ message: 'OTP sent to your email' });
+    } catch (emailErr) {
+      console.error('Forgot Password Email Error:', emailErr.message);
+      res.status(500).json({ message: 'Failed to send reset email' });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

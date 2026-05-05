@@ -33,9 +33,15 @@ const sendEmail = async (options) => {
   };
 
   try {
-    return await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ OTP Email Sent Successfully to:', options.email);
+    console.log('Message ID:', info.messageId);
+    return info;
   } catch (error) {
-    console.error('Email Fail:', error.message);
+    console.error('❌ FATAL Email Error:', error.message);
+    if (error.message.includes('auth')) {
+      console.error('HINT: Your EMAIL_USER or EMAIL_PASS (App Password) might be wrong.');
+    }
     throw error;
   }
 };

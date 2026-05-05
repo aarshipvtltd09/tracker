@@ -1,21 +1,27 @@
 const nodemailer = require('nodemailer');
 
+// Create transporter once and reuse it
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Verify connection configuration once at startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ Email Transporter Error:', error.message);
+  } else {
+    console.log('✅ Email Transporter Ready');
+  }
+});
+
 const sendEmail = async (options) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Use SSL
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Verify connection configuration
-    await transporter.verify();
-    console.log('✅ Email Transporter Ready');
-
     const mailOptions = {
       from: `"Tracker Support" <${process.env.EMAIL_USER}>`,
       to: options.email,
@@ -39,10 +45,12 @@ const sendEmail = async (options) => {
 
     const info = await transporter.sendMail(mailOptions);
     console.log('📧 Email sent successfully:', info.messageId);
+    return info;
   } catch (error) {
     console.error('❌ Nodemailer Error:', error.message);
-    throw error; // Rethrow to handle in controller
+    throw error;
   }
 };
 
 module.exports = sendEmail;
+

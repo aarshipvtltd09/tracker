@@ -13,13 +13,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Rate Limiting (Strict only for Auth to prevent Brute Force)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // 50 attempts per 15 mins for login/register
-  message: { message: "Too many login attempts, please try again later." }
-});
-app.use('/api/auth/', authLimiter);
+// app.use('/api/auth/', authLimiter); // Temporarily disabled to check for delays
 
 // Health Check for Render/Koyeb
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
@@ -36,7 +30,12 @@ app.use('/api/goals', require('./routes/goalRoutes'));
 // Database Connection with Retry Logic
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      maxPoolSize: 50, // Increased pool size
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4 // Force IPv4 (sometimes faster in some networks)
+    });
     const dbHost = mongoose.connection.host;
     console.log(`✅ MongoDB Connected (${dbHost})`);
   } catch (err) {
@@ -47,10 +46,8 @@ const connectDB = async () => {
 
 connectDB();
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
 module.exports = app;

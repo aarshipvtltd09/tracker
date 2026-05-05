@@ -19,8 +19,10 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    let user = await User.findOne({ email });
+    
+    // If user exists and is verified, they can't register again
+    if (user && user.isVerified) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -31,29 +33,63 @@ exports.registerUser = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      otp,
-      otpExpires
-    });
-
-    // Send Email
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Verify your Tracker account',
-        otp: otp
-      });
-      res.status(201).json({ message: 'OTP sent to email. Please verify.' });
-    } catch (err) {
-      user.otp = undefined;
-      user.otpExpires = undefined;
+    if (user && !user.isVerified) {
+      // Update existing unverified user
+      user.name = name;
+      user.password = hashedPassword;
+      user.otp = otp;
+      user.otpExpires = otpExpires;
       await user.save();
-      return res.status(500).json({ message: 'Email could not be sent. Check your EMAIL_USER and EMAIL_PASS settings.' });
+    } else {
+      // Create new user
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        otp,
+        otpExpires
+      });
     }
 
+    // Send Email in background (don't await to speed up response)
+    sendEmail({
+      email: user.email,
+      subject: 'Verify your Tracker account',
+      otp: otp
+    }).catch(err => console.error('Background Email Error:', err.message));
+
+    res.status(201).json({ message: 'OTP sent to email. Please verify.' });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'User is already verified' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save();
+
+    sendEmail({
+      email: user.email,
+      subject: 'Verify your Tracker account - New OTP',
+      otp: otp
+    }).catch(err => console.error('Background Email Error:', err.message));
+
+    res.json({ message: 'New OTP sent to email' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -89,29 +125,45 @@ exports.verifyOTP = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
+  const start = Date.now();
   try {
     const { email, password } = req.body;
+    console.log(`[Login] Attempt for: ${email}`);
+
+    const dbStart = Date.now();
     const user = await User.findOne({ email });
+    console.log(`[Login] DB Lookup took: ${Date.now() - dbStart}ms`);
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     if (!user.isVerified) {
-      return res.status(401).json({ message: 'Please verify your email first' });
+      return res.status(401).json({ 
+        message: 'Please verify your email first',
+        isVerified: false,
+        email: user.email 
+      });
     }
 
-    if (await bcrypt.compare(password, user.password)) {
+    const bcryptStart = Date.now();
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(`[Login] Bcrypt compare took: ${Date.now() - bcryptStart}ms`);
+
+    if (isMatch) {
+      const token = generateToken(user._id);
+      console.log(`[Login] Total time: ${Date.now() - start}ms`);
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token,
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (err) {
+    console.error(`[Login] Error: ${err.message}`);
     res.status(500).json({ message: err.message });
   }
 };
@@ -150,11 +202,11 @@ exports.forgotPassword = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
 
-    await sendEmail({
+    sendEmail({
       email: user.email,
       subject: 'Password Reset OTP - Tracker',
       otp: otp
-    });
+    }).catch(err => console.error('Background Email Error:', err.message));
 
     res.json({ message: 'OTP sent to your email' });
   } catch (err) {

@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # Expose port
-EXPOSE 5000
+EXPOSE 7860
 
 # Start server
 CMD ["node", "server.js"]

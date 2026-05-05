@@ -10,14 +10,16 @@ const PORT = process.env.PORT || 7860;
 
 // Security Middleware
 app.use(helmet());
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json({ limit: '10mb' }));
 
-// app.use('/api/auth/', authLimiter); // Temporarily disabled to check for delays
-
-// Health Check for Render/Koyeb
-app.get('/healthz', (req, res) => res.status(200).send('OK'));
-app.get('/', (req, res) => res.status(200).send('Server is running...'));
+// Health Check
+app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date() }));
+app.get('/', (req, res) => res.status(200).send('Tracker Server is live!'));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -26,6 +28,13 @@ app.use('/api/habits', require('./routes/habitRoutes'));
 app.use('/api/hobbies', require('./routes/hobbyRoutes'));
 app.use('/api/logs', require('./routes/logRoutes'));
 app.use('/api/goals', require('./routes/goalRoutes'));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('🔥 Server Error:', err.stack);
+  res.status(500).json({ message: 'Something went wrong!', error: err.message });
+});
+
 
 // Database Connection with Retry Logic
 const connectDB = async () => {

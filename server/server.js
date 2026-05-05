@@ -9,17 +9,13 @@ const app = express();
 const PORT = process.env.PORT || 7860;
 
 // Security Middleware
-app.use(helmet());
-app.use(cors({
-  origin: '*', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors()); // Simplest CORS for maximum compatibility
 app.use(express.json({ limit: '10mb' }));
 
 // Health Check
-app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date() }));
-app.get('/', (req, res) => res.status(200).send('Tracker Server is live!'));
+app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy' }));
+app.get('/', (req, res) => res.status(200).send('Server is active!'));
+
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

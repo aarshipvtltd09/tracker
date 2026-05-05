@@ -21,6 +21,10 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/', authLimiter);
 
+// Health Check for Render/Koyeb
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
+app.get('/', (req, res) => res.status(200).send('Server is running...'));
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));

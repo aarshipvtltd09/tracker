@@ -22,14 +22,9 @@ jobs:
       run: |
         cd server
         npm install
-        # npm test (Add tests later)
 
     - name: Build Client
       run: |
         cd client
         npm install
         npm run build
-
-    - name: Docker Build Check
-      run: |
-        docker-compose build

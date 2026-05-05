@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Filter, CheckCircle2 } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -18,7 +19,7 @@ const Tasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/tasks', {
+      const res = await fetch(`${API_URL}/api/tasks`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
@@ -35,7 +36,7 @@ const Tasks = () => {
   const toggleTask = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Completed' ? 'Pending' : 'Completed';
     try {
-      const res = await fetch(`/api/tasks/${id}`, {
+      const res = await fetch(`${API_URL}/api/tasks/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ const Tasks = () => {
 
   const deleteTask = async (id) => {
     try {
-      const res = await fetch(`/api/tasks/${id}`, { 
+      const res = await fetch(`${API_URL}/api/tasks/${id}`, { 
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -75,7 +76,7 @@ const Tasks = () => {
         return;
       }
 
-      const res = await fetch('/api/tasks', {
+      const res = await fetch(`${API_URL}/api/tasks`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

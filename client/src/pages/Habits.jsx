@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flame, Plus, Check } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const Habits = () => {
   const [habits, setHabits] = useState([]);
@@ -29,7 +30,7 @@ const Habits = () => {
 
   const fetchHabits = async () => {
     try {
-      const res = await fetch('/api/habits', {
+      const res = await fetch(`${API_URL}/api/habits`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
@@ -46,7 +47,7 @@ const Habits = () => {
   const toggleHabitDay = async (habitId, dateStr, isFuture) => {
     if (isFuture) return; // Prevent clicking future dates
     try {
-      const res = await fetch('/api/habits/track', {
+      const res = await fetch(`${API_URL}/api/habits/track`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -66,7 +67,7 @@ const Habits = () => {
   const addHabit = async () => {
     if (!newHabitName.trim()) return;
     try {
-      const res = await fetch('/api/habits', {
+      const res = await fetch(`${API_URL}/api/habits`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

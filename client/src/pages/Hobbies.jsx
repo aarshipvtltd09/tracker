@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Plus, Timer, History, Trash2 } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const Hobbies = () => {
   const [hobbies, setHobbies] = useState([]);
@@ -14,7 +15,7 @@ const Hobbies = () => {
 
   const fetchHobbies = async () => {
     try {
-      const res = await fetch('/api/hobbies', {
+      const res = await fetch(`${API_URL}/api/hobbies`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
@@ -31,7 +32,7 @@ const Hobbies = () => {
   const addTime = async (id) => {
     const timeToAdd = parseInt(manualTime[id] || 30);
     try {
-      const res = await fetch(`/api/hobbies/${id}`, {
+      const res = await fetch(`${API_URL}/api/hobbies/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ const Hobbies = () => {
         return;
       }
 
-      const res = await fetch('/api/hobbies', {
+      const res = await fetch(`${API_URL}/api/hobbies`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ const Hobbies = () => {
 
   const deleteHobby = async (id) => {
     try {
-      const res = await fetch(`/api/hobbies/${id}`, { 
+      const res = await fetch(`${API_URL}/api/hobbies/${id}`, { 
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });

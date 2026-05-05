@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Clock, Flame, TrendingUp, AlertTriangle, Check } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -24,7 +25,7 @@ const Dashboard = () => {
   const togglePriority = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Completed' ? 'Pending' : 'Completed';
     try {
-      const res = await fetch(`/api/tasks/${id}`, {
+      const res = await fetch(`${API_URL}/api/tasks/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -44,16 +45,16 @@ const Dashboard = () => {
     try {
       const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
       
-      const tasksRes = await fetch('/api/tasks', { headers });
+      const tasksRes = await fetch(`${API_URL}/api/tasks`, { headers });
       const tasks = await tasksRes.json();
       
-      const habitsRes = await fetch('/api/habits', { headers });
+      const habitsRes = await fetch(`${API_URL}/api/habits`, { headers });
       const habits = await habitsRes.json();
       
-      const hobbiesRes = await fetch('/api/hobbies', { headers });
+      const hobbiesRes = await fetch(`${API_URL}/api/hobbies`, { headers });
       const hobbiesData = await hobbiesRes.json();
 
-      const goalsRes = await fetch('/api/goals', { headers });
+      const goalsRes = await fetch(`${API_URL}/api/goals`, { headers });
       const goalsData = await goalsRes.json();
       setGoals(goalsData || []);
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Shield, Key, LogOut, Target, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const Profile = ({ setToken }) => {
   const [user, setUser] = useState({ name: 'User', email: '' });
@@ -21,7 +22,7 @@ const Profile = ({ setToken }) => {
 
   const fetchGoals = async () => {
     try {
-      const res = await fetch('/api/goals', {
+      const res = await fetch(`${API_URL}/api/goals`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
@@ -36,7 +37,7 @@ const Profile = ({ setToken }) => {
     if (!newGoal.trim()) return;
     setLoadingGoals(true);
     try {
-      const res = await fetch('/api/goals', {
+      const res = await fetch(`${API_URL}/api/goals`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const Profile = ({ setToken }) => {
 
   const handleDeleteGoal = async (id) => {
     try {
-      const res = await fetch(`/api/goals/${id}`, {
+      const res = await fetch(`${API_URL}/api/goals/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -72,7 +73,7 @@ const Profile = ({ setToken }) => {
     setPasswordError('');
     setPasswordSuccess('');
     try {
-      const res = await fetch('/api/auth/update-password', {
+      const res = await fetch(`${API_URL}/api/auth/update-password`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

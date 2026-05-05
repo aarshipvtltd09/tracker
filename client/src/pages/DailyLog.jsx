@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Calendar, Star, CheckCircle, Trash2, Edit2, Clock } from 'lucide-react';
+import { API_URL } from '../utils/api';
 
 const DailyLog = () => {
   const todayStr = new Date().toISOString().split('T')[0];
@@ -21,7 +22,7 @@ const DailyLog = () => {
 
   const fetchTodayLog = async () => {
     try {
-      const res = await fetch('/api/logs', {
+      const res = await fetch(`${API_URL}/api/logs`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
@@ -47,7 +48,7 @@ const DailyLog = () => {
   const handleSave = async () => {
     try {
       const method = editingId ? 'PATCH' : 'POST';
-      const url = editingId ? `/api/logs/${editingId}` : '/api/logs';
+      const url = editingId ? `${API_URL}/api/logs/${editingId}` : `${API_URL}/api/logs`;
       
       const res = await fetch(url, {
         method,
@@ -69,7 +70,7 @@ const DailyLog = () => {
 
   const deleteLog = async (id) => {
     try {
-      const res = await fetch(`/api/logs/${id}`, { 
+      const res = await fetch(`${API_URL}/api/logs/${id}`, { 
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });

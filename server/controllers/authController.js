@@ -49,20 +49,23 @@ exports.registerUser = async (req, res) => {
       });
     }
 
+    // Send Email (We await but the optimized transporter is fast)
     try {
       await sendEmail({
         email: user.email,
         subject: 'Tracker - Verify Your Account',
         otp: otp
       });
-      res.status(201).json({ message: 'OTP sent to your email. Valid for 10 mins.' });
+      res.status(201).json({ message: 'OTP sent to your email. Please verify.' });
     } catch (emailErr) {
-      console.error('Email Error:', emailErr);
+      console.error('Email Send Error:', emailErr.message);
+      // Still return 201 because user is created
       res.status(201).json({ 
-        message: 'Account created but email failed. Try "Resend OTP".',
+        message: 'Account created! If OTP email doesnt arrive in 1 min, click Resend OTP.',
         email: user.email 
       });
     }
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

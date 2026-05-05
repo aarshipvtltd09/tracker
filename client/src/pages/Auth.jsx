@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from '../utils/api';
 
 const Auth = ({ setToken }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +20,7 @@ const Auth = ({ setToken }) => {
     setError('');
     setLoading(true);
 
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    const endpoint = isLogin ? `${API_URL}/api/auth/login` : `${API_URL}/api/auth/register`;
     const body = isLogin ? { email, password } : { name, email, password };
 
     try {
@@ -55,7 +56,7 @@ const Auth = ({ setToken }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -80,7 +81,7 @@ const Auth = ({ setToken }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword })
@@ -107,7 +108,7 @@ const Auth = ({ setToken }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })

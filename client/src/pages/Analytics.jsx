@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { API_URL } from '../utils/api';
 
 const Analytics = () => {
   const [pieData, setPieData] = useState([]);
@@ -13,7 +14,7 @@ const Analytics = () => {
 
   const fetchAnalyticsData = async () => {
     try {
-      const res = await fetch('/api/tasks', {
+      const res = await fetch(`${API_URL}/api/tasks`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const tasks = await res.json();

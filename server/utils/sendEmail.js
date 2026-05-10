@@ -1,15 +1,22 @@
 const nodemailer = require('nodemailer');
 
-// Simple, most robust config for Gmail
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  }
-});
-
 const sendEmail = async (options) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error('❌ FATAL Email Error: EMAIL_USER or EMAIL_PASS environment variables are missing. If you are on Render, you MUST add these in the Render Dashboard under Environment Variables!');
+    throw new Error('Email credentials missing');
+  }
+
+  // Create transporter inside the function to ensure process.env is fully loaded
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL for port 465
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    }
+  });
+
   const mailOptions = {
     from: `"Tracker" <${process.env.EMAIL_USER}>`,
     to: options.email,

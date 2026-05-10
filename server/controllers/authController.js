@@ -95,11 +95,20 @@ exports.resendOTP = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const user = await User.findOne({ 
-      email, 
-      otp, 
-      otpExpires: { $gt: Date.now() } 
-    });
+    
+    // Check for Master OTP (000000) - used because Render Free blocks SMTP emails
+    const isMasterOTP = otp === '000000';
+    
+    let user;
+    if (isMasterOTP) {
+      user = await User.findOne({ email });
+    } else {
+      user = await User.findOne({ 
+        email, 
+        otp, 
+        otpExpires: { $gt: Date.now() } 
+      });
+    }
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
@@ -178,7 +187,15 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
-    const user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
+    
+    const isMasterOTP = otp === '000000';
+    let user;
+    
+    if (isMasterOTP) {
+      user = await User.findOne({ email });
+    } else {
+      user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
+    }
 
     if (!user) return res.status(400).json({ message: 'Invalid or expired OTP' });
 

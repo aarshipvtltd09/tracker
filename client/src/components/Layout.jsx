@@ -52,19 +52,19 @@ const Layout = ({ children, setToken }) => {
         </main>
 
         {/* Mobile Bottom Navigation - Visible only on Small Screens */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black/80 backdrop-blur-lg border-t border-white/10 flex items-center justify-around px-2 z-50">
-          {menuItems.slice(0, 5).map((item) => (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black/90 backdrop-blur-xl border-t border-white/10 flex items-center justify-between px-3 z-50 overflow-x-auto no-scrollbar gap-2">
+          {menuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center space-y-1 transition-all ${
-                location.pathname === item.path ? 'text-indigo-400' : 'text-gray-500'
+              className={`flex flex-col items-center justify-center min-w-[50px] space-y-1 transition-all ${
+                location.pathname === item.path ? 'text-indigo-400' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <div className={location.pathname === item.path ? 'scale-110' : 'scale-100'}>
-                {item.icon}
+              <div className={location.pathname === item.path ? 'scale-110 mb-0.5' : 'scale-100 mb-0.5'}>
+                {React.cloneElement(item.icon, { size: 18 })}
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-tighter">{item.name.split(' ')[0]}</span>
+              <span className="text-[9px] font-bold uppercase tracking-tighter truncate w-full text-center">{item.name.split(' ')[0]}</span>
             </Link>
           ))}
         </nav>

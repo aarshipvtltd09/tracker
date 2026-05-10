@@ -1,20 +1,12 @@
 const nodemailer = require('nodemailer');
 
-// Universal fast config for Gmail on Cloud
+// Simple, most robust config for Gmail
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // TLS
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-  },
-  pool: true,
-  maxConnections: 3,
-  tls: {
-    rejectUnauthorized: false // Skip verification for cloud network compatibility
-  },
-  connectionTimeout: 10000, // 10s
+  }
 });
 
 const sendEmail = async (options) => {

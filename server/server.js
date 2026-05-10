@@ -16,7 +16,6 @@ app.use(express.json({ limit: '10mb' }));
 app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy' }));
 app.get('/', (req, res) => res.status(200).send('Server is active!'));
 
-
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));

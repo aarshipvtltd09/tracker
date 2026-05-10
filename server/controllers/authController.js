@@ -49,22 +49,17 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    // Send Email (We await but the optimized transporter is fast)
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Tracker - Verify Your Account',
-        otp: otp
-      });
-      res.status(201).json({ message: 'OTP sent to your email. Please verify.' });
-    } catch (emailErr) {
-      console.error('Email Send Error:', emailErr.message);
-      // Still return 201 because user is created
-      res.status(201).json({ 
-        message: 'Account created! If OTP email doesnt arrive in 1 min, click Resend OTP.',
-        email: user.email 
-      });
-    }
+    // Send Email in the background to prevent server delay
+    sendEmail({
+      email: user.email,
+      subject: 'Tracker - Verify Your Account',
+      otp: otp
+    }).catch(emailErr => console.error('Background Email Error:', emailErr.message));
+
+    res.status(201).json({ 
+      message: 'Account created! OTP sent to your email. Please verify.',
+      email: user.email 
+    });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -84,11 +79,12 @@ exports.resendOTP = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    await sendEmail({
+    // Send Email in the background
+    sendEmail({
       email: user.email,
       subject: 'Tracker - Your New OTP',
       otp: otp
-    });
+    }).catch(err => console.error('Background Email Error:', err.message));
 
     res.json({ message: 'New OTP sent successfully' });
   } catch (err) {
@@ -166,11 +162,12 @@ exports.forgotPassword = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    await sendEmail({
+    // Send Email in the background
+    sendEmail({
       email: user.email,
       subject: 'Tracker - Reset Password OTP',
       otp: otp
-    });
+    }).catch(err => console.error('Background Email Error:', err.message));
 
     res.json({ message: 'Reset OTP sent to email' });
   } catch (err) {
